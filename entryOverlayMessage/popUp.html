@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Admin Notes</title>
+</head>
+
+<body style="font-family: 'Roboto Mono', monospace;">
+
+
+  <!-- Notes-->    		  
+  <div id="container" class="sticky-content">
+	<header id="notesHeader" class="header"></header>
+	<p id="adminNotes" class="notes"></p>
+	<p id="objectNotes" class="objNotes"></p>
+  </div>
+
+
+  <!-- Code -->
+  <script lang="js">
+	// Called when a message is received from the plugin
+    window.addEventListener('message', function (e) {
+	  // Set admin message
+      if (e.data.action === 'update-message') {
+		if (e.data.msg === 'hide') {
+			document.getElementById("container").style.visibility = "hidden";
+		}
+		else{
+			document.getElementById("container").style.visibility = "visible";
+		}
+        document.getElementById('adminNotes').innerHTML  = `${e.data.msg}`;
+      }
+	  else if (e.data.action === 'obj-update-message') {
+		document.getElementById('objectNotes').innerHTML  = `${e.data.msg}`;
+	  }
+	  else if (e.data.action === 'set-username') {
+        document.getElementById('notesHeader').innerHTML  = 'Hi, <b>' + `${e.data.msg}` + '!</b>';      
+	  }
+	});
+	
+	 // Tell plugin to send us info
+    parent.postMessage({ action: 'overlay-load' }, '*')
+	
+  </script>
+  
+  <style>	
+	 .header{
+		padding-right: 2px;
+		width:20%;
+	 }
+  
+	 .notes{
+		padding-left: 1px;
+		padding-right: 1px;
+		width:40%;
+	 }
+	 
+	 .objNotes{
+		padding-left: 2px;
+		width:30%;
+	 }
+	 
+	.sticky-content {
+	  background-color: rgba(189, 195, 199, 0.70);
+	  width: 93%;
+	  height: 80%;
+	  display: flex;
+	  justify-content: center;
+	  align-items: center;
+	  font-size: 1rem;
+	  padding: 7px;
+	  overflow: auto;
+	}
+
+	/* Position the sticky nicely, so it looks better */
+	html,
+	body {
+	  height: 100%;
+	  margin: 0;
+	  font-size: 11px;
+	}
+
+  </style>
+</body>
+</html>
