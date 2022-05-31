@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Admin Notes</title>
+</head>
+
+<body style="font-family: 'Roboto Mono', monospace;">
+
+
+  <!-- Notes-->    		  
+  <div id="container" class="sticky-content">
+	<p id="adminNotes"></p>
+	<div id="btnSection" class="btnContainer">
+		<button id="btnOk" type="button" class="okClass" onclick="sendResponse('ok')"></button>
+	</div>	
+  </div>
+  <div id="containerExit" class="sticky-content">
+	<p id="exitNotes">Thank you! Please close this window to continue.</p>
+  </div>
+
+  <!-- Code -->
+  <script lang="js">
+	// Called when a message is received from the plugin
+    window.addEventListener('message', function (e) {
+		document.getElementById('container').style.display = 'block';
+		document.getElementById("containerExit").style.display = 'none';
+	  // Set admin message
+      if (e.data.action === 'update-message') {				
+        document.getElementById('adminNotes').innerHTML  = `${e.data.msg}`;
+		document.getElementById('btnOk').innerHTML  = `${e.data.okBtn}`; 
+	  }
+	});
+	
+	function sendResponse(response){
+		document.getElementById('container').style.display = 'none';
+		document.getElementById("containerExit").style.display = 'block';
+		parent.postMessage({ action: response }, '*');
+	}
+	
+	 // Tell plugin to send us info
+    parent.postMessage({ action: 'load' }, '*')
+	
+  </script>
+  
+  <style>	
+	.btnContainer {
+		width:80%; 
+		align-items:center;
+		display: contents;
+	}
+	
+	.okClass {
+		width:48%; 
+		background-color: rgba(20, 195, 142);
+	    border-radius: 8px;
+	    border-style: none;
+	    box-shadow: rgba(39, 174, 96, .15) 0 4px 9px;
+	    box-sizing: border-box;
+	    color: #fff;
+		line-height: 2;
+	}
+	
+	.okClass:hover {
+	  background-color: #1e8449;
+	  opacity: 1;
+	  transform: translateY(0);
+	  transition-duration: .35s;
+	}
+
+	.okClass:active {
+	  transform: translateY(2px);
+	  transition-duration: .35s;
+	}
+
+	.okClass:hover {
+	  box-shadow: rgba(39, 174, 96, .2) 0 6px 12px;
+	}
+	
+	.sticky-content {
+	  background-color: rgba(189, 195, 199, 1);
+	  width: 96%;
+	  height: 94%;
+	  display: block;
+	  justify-content: center;
+	  align-items: center;
+	  font-size: 1.2rem;
+	  padding: 7px;
+	  overflow: auto;
+	  text-align: center;
+	}
+
+	/* Position the sticky nicely, so it looks better */
+	html,
+	body {
+	  height: 98%;
+	  margin: 0;
+	}
+
+  </style>
+</body>
+</html>
