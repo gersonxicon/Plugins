@@ -47,7 +47,7 @@
 		  section: 'infopanel',
             panel: {
                 iframeURL: this.paths.absolute('./popUp.html'),
-                width: 100,
+                width: 150,
                 height: 100
             }
 		});
