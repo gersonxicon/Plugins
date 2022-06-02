@@ -15,6 +15,7 @@
 	userName = '';
 	messageType = 'global';
 	userId = '';
+    hidePanel = false;
 	
 
     /** Called on load event */
@@ -42,15 +43,8 @@
             icon: 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeG1sbnM6c3ZnanM9Imh0dHA6Ly9zdmdqcy5jb20vc3ZnanMiIHZlcnNpb249IjEuMSIgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHg9IjAiIHk9IjAiIHZpZXdCb3g9IjAgMCAzMiAzMiIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgNTEyIDUxMiIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIgY2xhc3M9IiI+PGc+PHBhdGggeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiBkPSJtNCAyM2g4YTEgMSAwIDAgMCAwLTJoLThhMS4wMDEzIDEuMDAxMyAwIDAgMSAtMS0xdi0xMi4yNTlsOS40ODgzIDUuNTM0OWEzLjEyMzUgMy4xMjM1IDAgMCAwIDMuMDIzNCAwbDkuNDg4My01LjUzNDl2Mi4yNTlhMSAxIDAgMCAwIDIgMHYtNGEzLjA1IDMuMDUgMCAwIDAgLTIuMzk3LTIuOTM4OCAyLjk5MzEgMi45OTMxIDAgMCAwIC0uNjAzLS4wNjEyaC0yMGEzLjA2MjIgMy4wNjIyIDAgMCAwIC0zIDN2MTRhMy4wMDMzIDMuMDAzMyAwIDAgMCAzIDN6bTAtMThoMjBhLjk4NzkuOTg3OSAwIDAgMSAuODUzNi41MTFsLTEwLjM1IDYuMDM3M2ExIDEgMCAwIDEgLTEuMDA3OCAwbC0xMC4zNDk0LTYuMDM3M2EuOTg3OS45ODc5IDAgMCAxIC44NTM2LS41MTF6IiBmaWxsPSIjY2VjZWNlIiBkYXRhLW9yaWdpbmFsPSIjMDAwMDAwIiBjbGFzcz0iIi8+PHBhdGggeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiBkPSJtMjMgMTNhOCA4IDAgMSAwIDggOCA4LjAwOTIgOC4wMDkyIDAgMCAwIC04LTh6bTAgMTRhNiA2IDAgMSAxIDYtNiA2LjAwNjYgNi4wMDY2IDAgMCAxIC02IDZ6IiBmaWxsPSIjY2VjZWNlIiBkYXRhLW9yaWdpbmFsPSIjMDAwMDAwIiBjbGFzcz0iIi8+PGNpcmNsZSB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGN4PSIyMyIgY3k9IjI1IiByPSIxIiBmaWxsPSIjY2VjZWNlIiBkYXRhLW9yaWdpbmFsPSIjMDAwMDAwIiBjbGFzcz0iIi8+PHBhdGggeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiBkPSJtMjMgMTZhMSAxIDAgMCAwIC0xIDF2NWExIDEgMCAwIDAgMiAwdi01YTEgMSAwIDAgMCAtMS0xeiIgZmlsbD0iI2NlY2VjZSIgZGF0YS1vcmlnaW5hbD0iIzAwMDAwMCIgY2xhc3M9IiIvPjwvZz48L3N2Zz4K',
             action: this.onGlobalMenuPress.bind(this)
         });
-		// Register iframe in info panel
-		this.menus.register({
-		  section: 'infopanel',
-            panel: {
-                iframeURL: this.paths.absolute('./popUp.html'),
-                width: 150,
-                height: 100
-            }
-		});
+		
+        this.registerOverlayPanel();
 		
 		// Register component
         this.objects.registerComponent(plugVelocityBase, {
@@ -63,16 +57,15 @@
 				{ id: 'lbl-firstMessage', type: 'label', value: "First Message" },
 				{ id: 'txt-firstMessage', type: 'text'},
 				{ id: 'lbl-secondMessage', type: 'label', value: "Second Message" },
-				{ id: 'txt-secondMessage', type: 'text'},
-				{ id: 'sel-type', name: 'Alert Type', type: 'select', values: ['Alert', 'Iframe'] }				
+				{ id: 'txt-secondMessage', type: 'text'}				
             ]
         });
 		
 		// Register close panel button
 		const hidePnl = await this.menus.register({
             id: 'EYFoundry.user-hidepanel',
-            title: 'Close Panel',
-			text: 'Close Panel',
+            title: 'Show/Hide Panel',
+			text: 'Show/Hide Panel',
             section: 'controls',
             adminOnly: false,
 			currentUser: true,
@@ -82,10 +75,34 @@
 		
     }
 	
+    registerOverlayPanel(){
+        // Register iframe in info panel
+		this.menus.register({
+            id: 'EYFoundry.overlay-panel',
+            section: 'infopanel',
+              panel: {
+                  iframeURL: this.paths.absolute('./popUp.html'),
+                  width: 150,
+                  height: 100
+              }
+          });
+    }
+
 	/** Called when the user presses the Send Info button from Admin menu */
     async onHidePanel(e) {
-        // Send message
-        this.messages.send({ action: 'show-msg', text: 'hide' }, false, this.userId);
+        if(this.hidePanel)
+        {
+            this.registerOverlayPanel();
+            this.hidePanel = false;
+        }
+        else{           
+            this.menus.unregister('EYFoundry.overlay-panel');
+            this.hidePanel = true;
+        }       
+    }
+
+    clearObjMessage(){
+        this.messages.send({ action: 'obj-show-msg', text: ' ' }, false, this.userId);
     }
 	
 	/** Called when the user presses the Send Info button from Admin menu */
@@ -103,8 +120,8 @@
         }
 
         // Send message
-        this.messages.send({ action: 'show-msg', text: msg }, false, usr.user.id)
-
+        this.messages.send({ action: 'show-msg', text: msg }, false, usr.user.id);
+        this.clearObjMessage();
     }
 	
     /** Called when the user presses the Send Info button from Admin menu */
@@ -123,8 +140,8 @@
         }
 
         // Send message
-        this.messages.send({ action: 'show-msg', text: msg }, true)
-
+        this.messages.send({ action: 'show-msg', text: msg }, true);
+        this.clearObjMessage();
     }
 
     /** When an user receives the message */
