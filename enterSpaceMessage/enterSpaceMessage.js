@@ -29,6 +29,7 @@ module.exports = class enterSpaceMessage extends BasePlugin {
                 fields: [
                     { type: 'section', name: 'Space Message' },
                     { type: 'checkbox', id: 'enabled', name: 'Enabled', help: 'When enabled, the popup will be shown.' },
+					{ type: 'checkbox', id: 'sound', name: 'Sound', help: 'When enabled, sound will be avaiable on teleport.' },
                     { type: 'text', id: 'title', name: 'Title', help: 'Title of the message.' },
                     { type: 'text', id: 'text', name: 'Text', help: 'Text to display in the message.' },
 					{ type: 'text', id: 'btnYes', name: 'Yes Button Text', help: 'Text to display in Yes Button.' },
@@ -65,7 +66,8 @@ module.exports = class enterSpaceMessage extends BasePlugin {
 		}
 		else if(msg.action === 'yesResponse'){
 			try {
-				this.user.setPosition(parseFloat(this.getField('yesXLocation')), parseFloat(this.getField('yesYLocation')), parseFloat(this.getField('yesZLocation')),false);
+				this.playSound();
+				this.user.setPosition(parseFloat(this.getField('yesXLocation')), parseFloat(this.getField('yesYLocation')), parseFloat(this.getField('yesZLocation')),false);				
 			}
 			catch (e) {}
 			this.closePopUp();
@@ -76,6 +78,15 @@ module.exports = class enterSpaceMessage extends BasePlugin {
 		}		
     }
 	
+	playSound(){
+		const sound = this.paths.absolute('./teleport.mp3');
+
+		let volume = 0.2; 
+		if (sound && this.getField('sound')) {
+			this.audio.play(sound, { volume: volume })
+		}
+ 	}
+
 	/** When we receive a message, display it */
     onShowMessage(msg) {		 
 		// Show message in iframe

@@ -18,16 +18,11 @@
 		<button id="btnOk" type="button" class="okClass" onclick="sendResponse('ok')"></button>
 	</div>	
   </div>
-  <div id="containerExit" class="sticky-content">
-	<p id="exitNotes">Thank you! Please close this window to continue.</p>
-  </div>
 
   <!-- Code -->
   <script lang="js">
 	// Called when a message is received from the plugin
     window.addEventListener('message', function (e) {
-		document.getElementById('container').style.display = 'block';
-		document.getElementById("containerExit").style.display = 'none';
 	  // Set admin message
       if (e.data.action === 'update-message') {				
         document.getElementById('adminNotes').innerHTML  = `${e.data.msg}`;
@@ -36,8 +31,6 @@
 	});
 	
 	function sendResponse(response){
-		document.getElementById('container').style.display = 'none';
-		document.getElementById("containerExit").style.display = 'block';
 		parent.postMessage({ action: response }, '*');
 	}
 	

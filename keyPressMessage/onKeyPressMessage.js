@@ -12,6 +12,8 @@ module.exports = class KeyPressMessage extends BasePlugin {
     static get name()           { return 'KeyPressMessaging' }
     static get description()    { return 'Display custom messages to user on key press' }
 
+	iframeID = null;
+
     /** Called when the plugin is loaded */
     onLoad() {
 		// Keys Hook
@@ -37,6 +39,7 @@ module.exports = class KeyPressMessage extends BasePlugin {
                 fields: [
                     { type: 'section', name: 'KeyPress Message' },
                     { type: 'checkbox', id: 'enabled', name: 'Enabled', help: 'When enabled, the popup will be shown.' },
+					{ type: 'checkbox', id: 'sound', name: 'Sound', help: 'When enabled, sound will be avaiable on teleport.' },
                     { type: 'text', id: 'title', name: 'Title', help: 'Title of the message.' },
                     { type: 'text', id: 'text', name: 'Text', help: 'Text to display in the message.' },
 					{ type: 'text', id: 'btnText', name: 'Button Text', help: 'Text to display in the OK button.' },
@@ -64,12 +67,8 @@ module.exports = class KeyPressMessage extends BasePlugin {
 		//If enabled then catch key event
 		if (this.getField('enabled')) {
 			if (e.ctrlKey === true && (e.key === 'i' || e.key === 'I')) {
-				//Changing to alert
-				//const iframe = this.menus.displayPopup({ id: 'EYFoundry.iframe', title: this.getField('title'), panel: { iframeURL: this.paths.absolute('./popUp.html'), width: 400, height: 270 } });
-				await this.menus.alert(this.getField('text'), this.getField('title'), 'success');
-				this.transport();
-				//Changing to alert
-				//this.messages.send({ action: 'show-msg', text: this.getField('text') }, true);			
+				this.iframeID = await this.menus.displayPopup({ id: 'EYFoundry.iframe', title: this.getField('title'), panel: { iframeURL: this.paths.absolute('./popUp.html'), width: 400, height: 270 } });
+				this.messages.send({ action: 'show-msg', text: this.getField('text') }, true);			
 			} else {
 				return;
 			}
@@ -84,9 +83,24 @@ module.exports = class KeyPressMessage extends BasePlugin {
 	
 	transport(){
 		try {
-			this.user.setPosition(parseFloat(this.getField('xLocation')), parseFloat(this.getField('yLocation')), parseFloat(this.getField('zLocation')),false);
+			this.playSound();
+			this.user.setPosition(parseFloat(this.getField('xLocation')), parseFloat(this.getField('yLocation')), parseFloat(this.getField('zLocation')),false);			
 		}
 		catch (e) {}
+		this.closePopUp();
 	}
 
+	playSound(){
+	   	const sound = this.paths.absolute('./teleport.mp3');
+		
+		let volume = 0.2;
+		if (sound && this.getField('sound')) {
+			this.audio.play(sound, { volume: volume })
+		}
+    }
+
+	closePopUp(){
+		//Action to close
+		this.menus.closePopup(this.iframeID);
+	}
 }
