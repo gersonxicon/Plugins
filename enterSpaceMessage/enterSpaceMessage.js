@@ -15,6 +15,7 @@ module.exports = class enterSpaceMessage extends BasePlugin {
     static get description()    { return 'Display a message, in a popup, to users when they enter the space.' }
 
 	userName = '';
+	iframeID = null;
 
     /** Called when the plugin is loaded */
     async onLoad() {
@@ -43,17 +44,13 @@ module.exports = class enterSpaceMessage extends BasePlugin {
         // Show message now, if enabled
         if (this.getField('enabled')) {
 			// Send message
-			const iframe = await this.menus.register({ 
+			this.iframeID = await this.menus.displayPopup({ 
 				id: 'EYFoundry.iframe', 
 				title: this.getField('title'), 
-				section: 'overlay-top',
 				panel: { 
-					iframeURL: this.paths.absolute('./popUp.html'),
-					zIndex: 2,
-                	moveWhenPanelActive: false,
-					width: 200, 
-					height: 230 
-				} });
+					iframeURL: this.paths.absolute('./popUp.html'), 
+					width: 400, 
+					height: 280 } });
 			this.messages.send({ action: 'show-msg', text: this.getField('text') }, true);
 		}
 
@@ -87,6 +84,6 @@ module.exports = class enterSpaceMessage extends BasePlugin {
 	
 	closePopUp(){
 		//Action to close
-		this.menus.unregister('EYFoundry.iframe');
+		this.menus.closePopup(this.iframeID);
 	}
 }
