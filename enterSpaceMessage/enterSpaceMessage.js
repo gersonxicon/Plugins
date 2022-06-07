@@ -37,6 +37,7 @@ module.exports = class enterSpaceMessage extends BasePlugin {
 					{ type: 'text', id: 'yesXLocation', name: 'X Location', help: 'Set X location to transport on affirmative response.' },
 					{ type: 'text', id: 'yesYLocation', name: 'Y Location', help: 'Set Y location to transport on affirmative response.' },
 					{ type: 'text', id: 'yesZLocation', name: 'Z Location', help: 'Set Z location to transport on affirmative response.' },
+					{ type: 'text', id: 'radius', name: 'Radius', help: 'Set radius to teleport (integer).' },
 					{ type: 'text', id: 'noMessage', name: 'Negative Response Text', help: 'Text to display on negative response.' }
                 ]
             }
@@ -67,7 +68,9 @@ module.exports = class enterSpaceMessage extends BasePlugin {
 		else if(msg.action === 'yesResponse'){
 			try {
 				this.playSound();
-				this.user.setPosition(parseFloat(this.getField('yesXLocation')), parseFloat(this.getField('yesYLocation')), parseFloat(this.getField('yesZLocation')),false);				
+				let x = parseFloat(this.getField('yesXLocation')) + parseFloat(this.randomRadius());
+				let z = parseFloat(this.getField('yesZLocation')) + parseFloat(this.randomRadius());	
+				this.user.setPosition(x, parseFloat(this.getField('yesYLocation')), z,false);				
 			}
 			catch (e) {}
 			this.closePopUp();
@@ -96,5 +99,10 @@ module.exports = class enterSpaceMessage extends BasePlugin {
 	closePopUp(){
 		//Action to close
 		this.menus.closePopup(this.iframeID);
+	}
+
+	randomRadius(){
+		let radius = this.getField('radius') ?? 0;
+		return Math.floor(Math.random() * parseInt(radius)) + 1;
 	}
 }

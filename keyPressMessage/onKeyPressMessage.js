@@ -45,7 +45,8 @@ module.exports = class KeyPressMessage extends BasePlugin {
 					{ type: 'text', id: 'btnText', name: 'Button Text', help: 'Text to display in the OK button.' },
 					{ type: 'text', id: 'xLocation', name: 'X Location', help: 'Set X location to transport.' },
 					{ type: 'text', id: 'yLocation', name: 'Y Location', help: 'Set Y location to transport.' },
-					{ type: 'text', id: 'zLocation', name: 'Z Location', help: 'Set Z location to transport.' }
+					{ type: 'text', id: 'zLocation', name: 'Z Location', help: 'Set Z location to transport.' },
+					{ type: 'text', id: 'radius', name: 'Radius', help: 'Set radius to teleport (integer).' }
                 ]
             }
         })
@@ -84,7 +85,9 @@ module.exports = class KeyPressMessage extends BasePlugin {
 	transport(){
 		try {
 			this.playSound();
-			this.user.setPosition(parseFloat(this.getField('xLocation')), parseFloat(this.getField('yLocation')), parseFloat(this.getField('zLocation')),false);			
+			let x = parseFloat(this.getField('xLocation')) + parseFloat(this.randomRadius());
+			let z = parseFloat(this.getField('zLocation')) + parseFloat(this.randomRadius());	
+			this.user.setPosition(x, parseFloat(this.getField('yLocation')), z,false);			
 		}
 		catch (e) {}
 		this.closePopUp();
@@ -102,5 +105,10 @@ module.exports = class KeyPressMessage extends BasePlugin {
 	closePopUp(){
 		//Action to close
 		this.menus.closePopup(this.iframeID);
+	}
+
+	randomRadius(){
+		let radius = this.getField('radius') ?? 0;
+		return Math.floor(Math.random() * parseInt(radius)) + 1;
 	}
 }
