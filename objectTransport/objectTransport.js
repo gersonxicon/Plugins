@@ -140,7 +140,7 @@ let iframeID = null;
         }
     }
 
-    async moveObject(newX,newY,newZ){
+    async moveObject(){
          // Get object position
          const x = this.fields.x       || 0
          const y = this.fields.height  || 0
@@ -150,9 +150,14 @@ let iframeID = null;
             let newX = parseFloat(this.getField('xLocation'));
             let newY = parseFloat(this.getField('yLocation'));
 			let newZ = parseFloat(this.getField('zLocation'));	
+            
+            // Apply velocity
+            const velocity = 15;
+            await this.plugin.hooks.trigger('avatar.applyVerticalVelocity', { velocity: velocity });
             //Setting user position
             this.plugin.user.setPosition(newX + parseFloat(this.getField('radius')), newY, newZ + parseFloat(this.getField('radius')),false);	
-            await new Promise(r => setTimeout(r, 1000));
+                       
+            await new Promise(r => setTimeout(r, 800));
             //Setting object position
             this.setObjectPosition(newX,newY,newZ);            
             
