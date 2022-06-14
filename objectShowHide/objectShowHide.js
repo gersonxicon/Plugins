@@ -4,8 +4,8 @@
  *
  * @author gersonxicon
  */
-/** List of active coins */
-let activeCoins = [];
+/** List of active objects */
+let activeObjects = [];
 
  module.exports = class showHideObjectEvent extends BasePlugin {
 
@@ -19,7 +19,7 @@ let activeCoins = [];
 
     /** Called on load event */
     async onLoad() {
-	    // Register coin component
+	    // Register Object component
         this.objects.registerComponent(Obj, {
         id: 'EyFoundry.ShowHideObject',
         name: 'Show Hide Object',
@@ -42,8 +42,8 @@ let activeCoins = [];
         const userPos = await this.user.getPosition()
 
         // Run each timer
-        for (let coin of activeCoins) {
-            coin.onTimer(userPos);
+        for (let activeObj of activeObjects) {
+            activeObj.onTimer(userPos);
         }
 
     }
@@ -51,7 +51,7 @@ let activeCoins = [];
 
 
 /**
- * Component that allows an object to be a coin.
+ * Component that allows an object to be interactive.
  */
  class Obj extends BaseComponent {
 
@@ -64,7 +64,7 @@ let activeCoins = [];
         this.instanceID = Math.random().toString(36).substr(2);
 
         // Store it
-        activeCoins.push(this);
+        activeObjects.push(this);
     }
 
      /** Called when a message is received */
@@ -72,6 +72,11 @@ let activeCoins = [];
         // Check if it's a claiming message
         if (msg.action === 'found') {
             // Show it
+            
+            if (!this.hasPickedUp) {
+                this.playSound();
+            }
+            this.hasPickedUp = true;
             this.plugin.objects.update(this.objectID, { hidden: false }, true);
         }
         else if (msg.action === 'hide') {
@@ -98,5 +103,14 @@ let activeCoins = [];
        
         // Notify other users that we claimed it
         this.sendMessage({ action: 'found' },  false, this.userId);
+    }
+
+    playSound(){
+        const sound = this.paths.absolute('./treasure.mp3');
+     
+        let volume = 0.2;
+        if (sound) {
+            this.plugin.audio.play(sound, { volume: volume })
+        }
     }
  }
