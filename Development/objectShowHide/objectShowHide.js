@@ -6,6 +6,7 @@
  */
 /** List of active objects */
 let activeObjects = [];
+let scorePoints = 0;
 
  module.exports = class showHideObjectEvent extends BasePlugin {
 
@@ -26,6 +27,8 @@ let activeObjects = [];
         description: 'Show Hide Object based on event.'
         });		
 
+        this.registerOverlayPanel();
+
         // Stop here if on the server
         if (this.isServer) {
             return;
@@ -34,6 +37,33 @@ let activeObjects = [];
         // Start a distance check timer
         this.timer = setInterval(this.onTimer.bind(this), 200);
     }	
+
+    registerOverlayPanel(){
+        // Register iframe in info panel
+		this.menus.register({
+            id: 'EYFoundry.overlay-score-panel',
+            section: 'infopanel',
+              panel: {
+                  iframeURL: this.paths.absolute('./overlay.html'),
+                  width: 150,
+                  height: 100
+              }
+          });
+    }
+
+    onMessage(msg) {	
+        // Check message type
+        if(msg.action === 'panel-load')
+        {
+            this.setInitialScore(0);
+        }
+    }
+
+    /** When we receive a message, display it */
+    setInitialScore(score) {
+		// Show message in iframe
+        this.menus.postMessage({ action: 'set-score', msg: score },true);
+    }
 
     /** Called on a regular interval */
     async onTimer() {
@@ -71,11 +101,12 @@ let activeObjects = [];
      onMessage(msg) {
         // Check if it's a claiming message
         if (msg.action === 'found') {
-            // Show it
-            
+            // Show it            
             if (!this.hasPickedUp) {
                 this.playSound();
-            }
+            }            
+            scorePoints++;
+            this.setScore(scorePoints);
             this.hasPickedUp = true;
             this.plugin.objects.update(this.objectID, { hidden: false }, true);
         }
@@ -83,6 +114,11 @@ let activeObjects = [];
             // Hide it
             this.plugin.objects.update(this.objectID, { hidden: true }, true);
         }
+    }
+
+    setScore(score) {
+		// Show message in iframe
+        this.plugin.menus.postMessage({ action: 'set-score', msg: score },true);
     }
 
      /** Called on a regular basis to check if user can see the object */

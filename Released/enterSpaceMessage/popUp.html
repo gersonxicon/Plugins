@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Admin Notes</title>
+</head>
+
+<body style="font-family: 'Roboto Mono', monospace;">
+
+
+  <!-- Notes-->    		  
+  <div id="container" class="sticky-content">
+	<header id="notesHeader"></header>
+	<p id="adminNotes"></p>
+	<div id="btnSection" class="btnContainer">
+		<button id="btnYes" type="button" class="yesClass" onclick="sendResponse('yesResponse')"></button>
+		<button id="btnNo" type="button" class="noClass" onclick="sendResponse('noResponse')"></button>		
+	</div>	
+  </div>
+  
+  <!-- Code -->
+  <script lang="js">
+	// Called when a message is received from the plugin
+    window.addEventListener('message', function (e) {
+	  // Set admin message
+      if (e.data.action === 'update-message') {				
+        document.getElementById('adminNotes').innerHTML  = `${e.data.msg}`;
+		document.getElementById('notesHeader').innerHTML  = 'Hello, <b>' + `${e.data.userName}` + '!</b>'; 
+		document.getElementById('btnYes').innerHTML  = `${e.data.yesBtn}`; 
+		document.getElementById('btnNo').innerHTML  = `${e.data.noBtn}`; 
+	  }
+	});
+	
+	function sendResponse(response){
+		parent.postMessage({ action: response }, '*');
+	}
+	
+	 // Tell plugin to send us info
+    parent.postMessage({ action: 'load' }, '*')
+	
+  </script>
+  
+  <style>	
+	.btnContainer {
+		width:80%; 
+		align-items:center;
+		display: contents;
+	}
+	
+	.yesClass {
+		width:48%; 
+		background-color: rgba(20, 195, 142);
+	    border-radius: 8px;
+	    border-style: none;
+	    box-shadow: rgba(39, 174, 96, .15) 0 4px 9px;
+	    box-sizing: border-box;
+	    color: #fff;
+		line-height: 2;
+	}
+	
+	.yesClass:hover {
+	  background-color: #1e8449;
+	  opacity: 1;
+	  transform: translateY(0);
+	  transition-duration: .35s;
+	}
+
+	.yesClass:active {
+	  transform: translateY(2px);
+	  transition-duration: .35s;
+	}
+
+	.yesClass:hover {
+	  box-shadow: rgba(39, 174, 96, .2) 0 6px 12px;
+	}
+	
+	.noClass {
+		width:48%; 
+		background-color: rgba(20, 195, 142);
+		border-radius: 8px;
+		border-style: none;
+		box-shadow: rgba(39, 174, 96, .15) 0 4px 9px;
+		box-sizing: border-box;
+		color: #fff;
+		line-height: 2;
+	}	
+	
+	.noClass:hover {
+	  background-color: #1e8449;
+	  opacity: 1;
+	  transform: translateY(0);
+	  transition-duration: .35s;
+	}
+
+	.noClass:active {
+	  transform: translateY(2px);
+	  transition-duration: .35s;
+	}
+
+	.noClass:hover {
+	  box-shadow: rgba(39, 174, 96, .2) 0 6px 12px;
+	}
+	
+	.sticky-content {
+	  background-color: rgba(189, 195, 199, 1);
+	  width: 96%;
+	  height: 94%;
+	  display: block;
+	  justify-content: center;
+	  align-items: center;
+	  font-size: 1.2rem;
+	  padding: 7px;
+	  overflow: auto;
+	  text-align: center;
+	}
+
+	html,
+	body {
+	  height: 100%;
+	  margin: 0;
+	}
+
+  </style>
+</body>
+</html>

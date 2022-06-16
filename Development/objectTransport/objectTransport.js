@@ -126,7 +126,7 @@ let iframeID = null;
         if(this.available)
         {
             this.playSound();
-            this.sendMessage({ action: 'show-msg', text: 'Ready to take a ride!', obj: this.objectID },  false, this.userId);        		
+            await this.sendMessage({ action: 'show-msg', text: 'Ready to take a ride!', obj: this.objectID },  false, this.userId);        		
             iframeID = await this.plugin.menus.displayPopup({ id: 'EYFoundry.iframe', title: 'Welcome!', panel: { iframeURL: this.paths.absolute('./popUp.html'), width: 400, height: 270 } });
         }
     }
