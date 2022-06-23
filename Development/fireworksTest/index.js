@@ -59,7 +59,7 @@
                         height: 100
                     }
                 });            
-            await new Promise(r => setTimeout(r, 20000));        
+            await new Promise(r => setTimeout(r, 10000));        
             this.menus.unregister('EYFoundry.overlay-fireworks');  
             this.fireworks = false;
         }
