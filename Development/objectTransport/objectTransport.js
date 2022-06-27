@@ -185,7 +185,7 @@ let iframeID = null;
 
             let tween = new TWEEN.Tween(coords)
             .to(target, 3000)
-            .easing(TWEEN.Easing.Quadratic.InOut)
+            .easing(TWEEN.Easing.Exponential.InOut)
             .repeat(1)
             .on('update', function (obj) {
                 _self.plugin.objects.update(
