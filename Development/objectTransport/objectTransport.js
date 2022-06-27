@@ -87,6 +87,8 @@ let iframeID = null;
 
      /** Called when the component is loaded */ 
     async onLoad() {
+        importScripts('https://cdnjs.cloudflare.com/ajax/libs/es6-tween/5.5.11/Tween.min.js');
+        TWEEN.autoPlay(true);
         // Store it
         activeObjects.push(this);
     }
@@ -152,29 +154,47 @@ let iframeID = null;
 			let newZ = parseFloat(this.getField('zLocation'));	
             
             // Apply velocity
-            const velocity = 15;
+            /*const velocity = 15;
             await this.plugin.hooks.trigger('avatar.applyVerticalVelocity', { velocity: velocity });
             //Setting user position
             this.plugin.user.setPosition(newX + parseFloat(this.getField('radius')), newY, newZ + parseFloat(this.getField('radius')),false);	
-                       
-            await new Promise(r => setTimeout(r, 800));
+            */           
+           
             //Setting object position
-            this.setObjectPosition(newX,newY,newZ);            
+            this.setObjectPosition(x,y,z,newX,newY,newZ);            
             
-            await new Promise(r => setTimeout(r, 2000));
+            await new Promise(r => setTimeout(r, 3000));
             //Return to original position           
-            this.setObjectPosition(x,y,z);	
+            this.setObjectPosition(newX,newY,newZ,x,y,z);	
 
 		}
 		catch (e) {}		
 	}
 
-    setObjectPosition(x,y,z){
-        this.plugin.objects.update(
+    setObjectPosition(prevX,prevY,prevZ,setX,setY,setZ){
+        /*this.plugin.objects.update(
             this.objectID,
             {
                 position: [ x, y, z ]                    
             },
-            false);		
+            false);		*/
+            var _self = this;
+            //Funciona desde aca***
+            let coords = { x: prevX, y: prevY, z: prevZ };
+            let target = { x: setX, y: setY, z: setZ };
+
+            let tween = new TWEEN.Tween(coords)
+            .to(target, 3000)
+            .easing(TWEEN.Easing.Quadratic.InOut)
+            .repeat(1)
+            .on('update', function (obj) {
+                _self.plugin.objects.update(
+                    _self.objectID,
+                    {
+                        position: [ obj.x, obj.y, obj.z ]                    
+                    },
+                    false);	
+            })
+            .start();
     }
  }
