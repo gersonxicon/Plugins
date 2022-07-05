@@ -34,7 +34,7 @@
 	  if (e.data.action == 'set-urls')
 	  {
 		imgPointer = 0;
-		imgList = e.data.msg.split(';');
+		imgList = this.removeLastSC(e.data.msg).split(';');
 		if(imgList.length > 0)
 		{
 			document.getElementById("imgDiv").src = imgList[imgPointer];
@@ -48,6 +48,15 @@
 	  }        
      
 	});
+
+	function removeLastSC(strList)
+	{
+		if (strList.substring(strList.length-1) == ";")
+    	{
+        	strList = strList.substring(0, strList.length-1);
+    	}
+		return strList;
+	}
 	
 	function sendResponse(response){
 		if(response === 'prev')
