@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Hello!</title>
+</head>
+
+<body style="font-family: 'Roboto Mono', monospace;">
+
+
+  <!-- Notes-->    		  
+  <div id="container" class="sticky-content">
+	<div id="imgSection" class="imgSection">
+		<img id="imgDiv" width="100%" height="100%"/>
+	</div>
+	<div id="btnSection" class="btnContainer">		
+		<button id="btnPrev" type="button" class="okClass" onclick="sendResponse('prev')">Previous</button>
+		<button id="btnNext" type="button" class="okClass" onclick="sendResponse('next')">Next</button>				
+	</div>	
+  </div>
+
+  <!-- Code -->
+  <script lang="js">
+	var imgList = null;
+	var imgPointer = 0;
+	var last = false;
+	
+	// Called when a message is received from the plugin
+    window.addEventListener('message', function (e) {
+	  // Set admin message
+	  if (e.data.action == 'set-urls')
+	  {
+		imgPointer = 0;
+		imgList = e.data.msg.split(';');
+		if(imgList.length > 0)
+		{
+			document.getElementById("imgDiv").src = imgList[imgPointer];
+			imgPointer++;
+		}
+		if(imgList.length === 1)
+		{
+			document.getElementById('btnPrev').style.visibility = 'hidden';
+			document.getElementById("btnNext").textContent = 'Close';
+			last = true;
+		}
+	  }        
+     
+	});
+	
+	function sendResponse(response){
+		if(response === 'prev')
+		{
+			if(imgPointer > 0)
+			{
+				imgPointer--;
+			}
+
+			last = false;
+			document.getElementById("btnNext").textContent = 'Next';
+			document.getElementById("imgDiv").src = imgList[imgPointer];
+		}
+		else if (response === 'next'){	
+			//Checking if it's last image
+			if(last)
+			{
+				parent.postMessage({ action: 'ok' }, '*');
+			}
+
+			if(imgPointer < imgList.length - 1)
+			{
+				imgPointer ++;
+			}
+			if(imgPointer === imgList.length - 1)
+			{
+				document.getElementById("btnNext").textContent = 'Close';
+				last = true;
+			}			
+			
+			document.getElementById("imgDiv").src = imgList[imgPointer];			
+		}
+	}
+
+	// On load, ask the plugin to send us all it's messages
+	parent.postMessage({ action: 'panel-load' }, '*')
+	
+  </script>
+  
+  <style>	
+	.btnContainer {
+		width:80%; 
+		height: 15%;
+		align-items:center;
+		display: contents;
+	}
+	
+	.okClass {
+		width:48%; 
+		background-color: rgba(20, 195, 142);
+	    border-radius: 8px;
+	    border-style: none;
+	    box-shadow: rgba(39, 174, 96, .15) 0 4px 9px;
+	    box-sizing: border-box;
+	    color: #fff;
+		line-height: 2;
+	}
+	
+	.okClass:hover {
+	  background-color: #1e8449;
+	  opacity: 1;
+	  transform: translateY(0);
+	  transition-duration: .35s;
+	}
+
+	.okClass:active {
+	  transform: translateY(2px);
+	  transition-duration: .35s;
+	}
+
+	.okClass:hover {
+	  box-shadow: rgba(39, 174, 96, .2) 0 6px 12px;
+	}
+	
+	.imgSection{
+	  	height: 85%;
+		padding-bottom: 5px;
+	}
+
+	.sticky-content {
+	  background-color: rgba(189, 195, 199, 1);
+	  width: 96%;
+	  height: 94%;
+	  display: block;
+	  justify-content: center;
+	  align-items: center;
+	  font-size: 1.2rem;
+	  padding: 7px;
+	  overflow: auto;
+	  text-align: center;
+	}
+	
+	/* Position the sticky nicely, so it looks better */
+	html,
+	body {
+	  height: 98%;
+	  margin: 0;
+	}
+
+  </style>
+</body>
+</html>
