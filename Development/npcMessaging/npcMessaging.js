@@ -104,11 +104,6 @@ let countFiles = 0;
         }        
     }
 
-    /** Called when the component is unloaded */
-    onUnload() {
-        activeObjects = [];
-    }
-
      /** Called when a message is received */
      onMessage(msg) {
         // Check if it's a claiming message
