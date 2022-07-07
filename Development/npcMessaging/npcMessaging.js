@@ -8,7 +8,6 @@
 let activeObjects = [];
 let iframeID = null;
 let imagesList = '';
-let countFiles = 0;
 
  module.exports = class npcMessaginPlugin extends BasePlugin {
 
