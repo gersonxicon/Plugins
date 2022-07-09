@@ -27,8 +27,8 @@ let activeUsers = [];
         description: 'Convert this object to a plate to open the door.',
         settings: [
             { type: 'text', id: 'activationDistance', name: 'Activation Distance', help: 'Set activation distance for object interaction (integer).' },
-            { type: 'text', id: 'usersPlate', name: 'Amount of users for plate', help: 'Set amount of users for plate in order to push it (integer).' }
-
+            { type: 'text', id: 'usersPlate', name: 'Amount of users for plate', help: 'Set amount of users for plate in order to push it (integer).' },
+            { type: 'checkbox', id: 'door', name: 'Mark as door', help: 'Check this to mark this object as a door.' }
         ]
         });		
 
@@ -73,13 +73,14 @@ let activeUsers = [];
  */
  class Obj extends BaseComponent {
     userId = '';
+    hasPickedUp = true;
 
     /** Called when the component is loaded */
     async onLoad() {
         importScripts('https://cdnjs.cloudflare.com/ajax/libs/es6-tween/5.5.11/Tween.min.js');
         TWEEN.autoPlay(true);
 
-        this.userId = await this.plugin.user.getID();
+        this.userId = await this.plugin.user.getID()
 
         // Generate instance ID
         this.instanceID = Math.random().toString(36).substr(2);
@@ -94,41 +95,57 @@ let activeUsers = [];
     }
 
      /** Called when a message is received */
-     onMessage(msg) {
-        // Check if it's a claiming message
-        if (msg.action === 'found') {
-                // Store it
-                let index = this.getIndex(msg.usr);
-                if(index < 0){ 
-                    //Adding new row to the array  
-                    var valueToPush = {};
-                    valueToPush.usr = msg.usr;
-                    valueToPush.obj = msg.obj;
-                    valueToPush.activated = false;
-                    activeUsers.push(valueToPush);   
+     async onMessage(msg) {
+        if(!this.getField('door'))
+        {
+            // Check if it's a claiming message
+            if (msg.action === 'found') {
+                    // Store it
+                    let index = this.getIndex(msg.usr);
+                    if(index < 0){ 
+                        //Adding new row to the array  
+                        var valueToPush = {};
+                        valueToPush.usr = msg.usr;
+                        valueToPush.obj = msg.obj;
+                        valueToPush.activated = false;
+                        activeUsers.push(valueToPush);   
+                        //Get users on this object
+                        const res = this.getUsersOnObject(msg.obj);
+                        if(res.length === parseInt(this.getField('usersPlate')) && !this.checkActivatedObj(msg.obj))
+                        {        
+                            this.moveObject('plate',0,-0.1,0,msg.obj);    
+                            //Update all existing rows for current object
+                            this.updateActivatedObj(msg.obj,true);   
+                            this.hasPickedUp = false;                    
+                        }                           
+                    }                  
+            }   
+            else if(msg.action === 'hide'){    
+                //if(msg.obj === this.objectID && msg.usr === this.userId){  
+                if(!this.checkUserInOtherObj(msg.obj,msg.usr)){
                     //Get users on this object
-                    const res = this.getUsersOnObject();
-                    if(res.length === parseInt(this.getField('usersPlate')) && !this.checkActivatedObj())
-                    {        
-                        this.moveObject('plate',0,-0.1,0);    
-                        //Update all existing rows for current object
-                        this.updateActivatedObj(true);                        
-                    }                           
-                }                  
-        }   
-        else if(msg.action === 'hide'){             
-            //Get users on this object
-            const res = this.getUsersOnObject();     
-            if(res.length > 0){     
-                const activeUsers = this.getActiveUsersOnObject();
-                if(activeUsers === parseInt(this.getField('usersPlate') - 1)){
-                    //Returning to original position
-                    this.moveObject('plate',0,0.1,0);   
-                    this.updateActivatedObj(false);  
+                    const res = this.getUsersOnObject(msg.obj);     
+                    if(res.length > 0){   
+                        const actUsers = this.getActiveUsersOnObject(msg.obj);
+                        if(actUsers === parseInt(this.getField('usersPlate')) - 1 && this.checkActivatedObj(msg.obj)){                            
+                            this.checkActivatedObj(msg.obj);
+                            //Returning to original position
+                            this.moveObject('plate',0,0.1,0,msg.obj);  
+                            this.updateActivatedObj(msg.obj,false);  
+                        }                                    
+                        this.removeUser(msg);
+                    } 
+                    else{
+                        if(parseInt(this.getField('usersPlate')) === 1 && !this.hasPickedUp){
+                            //Returning to original position
+                            this.moveObject('plate',0,0.1,0,msg.obj); 
+                            this.hasPickedUp = true;
+                        }    
+                    }
                 }
-                this.removeUser(msg);
-            } 
-        }     
+                //}
+            }     
+        }
     }
   
     getIndex(search) {
@@ -142,17 +159,17 @@ let activeUsers = [];
         }        
     }
 
-    getUsersOnObject(){
+    getUsersOnObject(obj){
         const res = activeUsers.filter((object) => {
-            return object.obj === this.objectID;
+            return object.obj === obj;
         }) 
         return res;
     }
 
-    getActiveUsersOnObject(){
+    getActiveUsersOnObject(obj){
         var intUsers = 0;
         for (var i = 0, l = activeUsers.length; i < l; i++) {
-            if (activeUsers[i].obj === this.objectID) {
+            if (activeUsers[i].obj === obj) {
                 if (activeUsers[i].activated) {
                     intUsers++;
                 }                
@@ -161,19 +178,19 @@ let activeUsers = [];
         return intUsers;
     }
 
-    updateActivatedObj(value){
+    updateActivatedObj(obj,value){
         for (var i = 0, l = activeUsers.length; i < l; i++) {
-            if (activeUsers[i].obj === this.objectID) {
+            if (activeUsers[i].obj === obj) {
                 activeUsers[i].activated = value;
                 break;
             }
         } 
     }
 
-    checkActivatedObj(){
+    checkActivatedObj(obj){
         var bolActivated = false;
         for (var i = 0, l = activeUsers.length; i < l; i++) {
-            if (activeUsers[i].obj === this.objectID) {
+            if (activeUsers[i].obj === obj) {
                 if (activeUsers[i].activated) {
                     bolActivated = true;
                     break;
@@ -182,8 +199,24 @@ let activeUsers = [];
         } 
         return bolActivated;
     }
+
+    checkUserInOtherObj(obj,usr){
+        var bolActivated = false;
+        for (var i = 0, l = activeUsers.length; i < l; i++) {
+            if (activeUsers[i].obj !== obj) {
+                if(activeUsers[i].usr === usr)
+                {
+                    if (activeUsers[i].activated) {
+                        bolActivated = true;
+                        break;
+                    }      
+                }          
+            }
+        } 
+        return bolActivated;
+    }
     
-    async moveObject(type, setX,setY,setZ){
+    async moveObject(type, setX,setY,setZ,obj){
         // Get object position
         const x = this.fields.x       || 0
         const y = this.fields.height  || 0
@@ -197,13 +230,13 @@ let activeUsers = [];
                 let newZ = z + setZ;	
                 
                 //Setting object position
-                this.setObjectPosition(x,y,z,newX,newY,newZ);                            
+                this.setObjectPosition(x,y,z,newX,newY,newZ,obj);                            
             }
        }
        catch (e) {}		
    }
 
-   setObjectPosition(prevX,prevY,prevZ,setX,setY,setZ){       
+   setObjectPosition(prevX,prevY,prevZ,setX,setY,setZ,objectID){     
            var _self = this;
            //Funciona desde aca***
            let coords = { x: prevX, y: prevY, z: prevZ };
@@ -215,7 +248,7 @@ let activeUsers = [];
            .repeat(1)
            .on('update', function (obj) {
                _self.plugin.objects.update(
-                   _self.objectID,
+                   objectID,
                    {
                        position: [ obj.x, obj.y, obj.z ]                    
                    },
@@ -225,7 +258,7 @@ let activeUsers = [];
    }
 
      /** Called on a regular basis to check if user can see the object */
-     onTimer(userPos) {
+     async onTimer(userPos) {
 
         const x = this.fields.x       || 0
         const y = this.fields.height  || 0
