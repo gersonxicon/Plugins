@@ -30,7 +30,9 @@ let activeDoors = [];
             { type: 'text', id: 'activationDistance', name: 'Activation Distance', help: 'Set activation distance for object interaction (integer).' },
             { type: 'text', id: 'usersPlate', name: 'Amount of users for plate', help: 'Set amount of users for plate in order to push it (integer).' },
             { type: 'checkbox', id: 'door', name: 'Mark as door', help: 'Check this to mark this object as a door.' },
-            { type: 'text', id: 'doorMovement', name: 'Door movement amount', help: 'Set door movement amount for each pushed plate (float).' }
+            { type: 'text', id: 'xDoor', name: 'Door X permanent position', help: 'Set door X permanent position.' },
+            { type: 'text', id: 'yDoor', name: 'Door Y permanent position', help: 'Set door Y permanent position.' },
+            { type: 'text', id: 'zDoor', name: 'Door Z permanent position', help: 'Set door Z permanent position.' }
         ]
         });		
 
@@ -81,6 +83,8 @@ let activeDoors = [];
     doorMov = 0;
     doorMovCount = 0;
     doorMoved = false;
+    /** Door sound */
+    doorSound = this.paths.absolute('./door.mp3')
 
     /** Called when the component is loaded */
     async onLoad() {
@@ -89,7 +93,6 @@ let activeDoors = [];
 
         this.userId = await this.plugin.user.getID()
         this.isDoor = (this.getField('door') === undefined) ? false : this.getField('door');
-        this.doorMov = parseFloat((this.getField('doorMovement') === undefined) ? 0.1 : this.getField('doorMovement'));
         // Generate instance ID
         this.instanceID = Math.random().toString(36).substr(2);
 
@@ -98,9 +101,8 @@ let activeDoors = [];
 
         this.setActiveDoors();
 
-        const sound = this.paths.absolute('./treasure.mp3');
-        if (sound) {
-            this.plugin.audio.preload(sound)
+        if (this.doorSound) {
+            this.plugin.audio.preload(this.doorSound);
         }        
     }
 
@@ -119,23 +121,35 @@ let activeDoors = [];
                         activeUsers.push(valueToPush);   
                         //Get users on this object
                         const res = this.getUsersOnObject(msg.obj);
-                        if(res.length === parseInt(this.getField('usersPlate')) && !this.checkActivatedObj(msg.obj))
-                        {   
+                        if(res.length === parseInt(this.getField('usersPlate')) && !this.checkActivatedObj(msg.obj)){   
                             //Push plate     
-                            this.moveObject('plate',0,-0.1,0,msg.obj); 
-
+                            //await this.moveObject('plate',0,-0.1,0,msg.obj); 
+                            if(!this.doorMoved){
+                                this.playSound();
+                            }
                             //Move doors
-                            var doorObjects = this.getDoorObjects();
-                            let activatedObjects = this.getActivatedPlates();
+                            var doorObjects = this.getDoorObjects();                            
                             //if(activatedObjects < (this.getPlateObjects().length - 1)){
-                                for (var i = 0, l = doorObjects.length; i < l; i++) {
-                                    this.moveObject('door',0,-(this.doorMov),0,doorObjects[i]);                                
-                                } 
+                                /*for (var i = 0, l = doorObjects.length; i < l; i++) {
+                                    await this.moveObject('door',0,-(this.doorMov),0,doorObjects[i]);                                
+                                }*/ 
                             //}
                             
                             //Update all existing rows for current object
                             this.updateActivatedObj(msg.obj,true);   
                             this.hasPickedUp = false;   
+
+                            let activatedObjects = this.getActivatedPlates();
+                            if(activatedObjects === this.getPlateObjects().length){
+                                for (var i = 0, l = doorObjects.length; i < l; i++) {
+                                    if(parseFloat(this.getField('yDoor')) !== doorObjects[i].fields.height){
+                                        await this.moveObject('door',parseFloat(this.getField('xDoor')),parseFloat(this.getField('yDoor')),parseFloat(this.getField('zDoor')),doorObjects[i]);                                
+                                    }
+                                    else{
+                                        this.doorMoved = true;
+                                    }
+                                }
+                            }
                         }                           
                     }                  
             }   
@@ -149,12 +163,12 @@ let activeDoors = [];
                         if(actUsers === parseInt(this.getField('usersPlate')) - 1 && this.checkActivatedObj(msg.obj)){                            
                             this.checkActivatedObj(msg.obj);
                             //Returning to original position
-                            this.moveObject('plate',0,0.1,0,msg.obj);  
+                            //await this.moveObject('plate',0,0.1,0,msg.obj);  
                             //Returning door
                             var doorObjects = this.getDoorObjects();                           
-                            for (var i = 0, l = doorObjects.length; i < l; i++) {
-                                this.moveObject('door',0,(this.doorMov),0,doorObjects[i]);
-                            }                              
+                            /*for (var i = 0, l = doorObjects.length; i < l; i++) {
+                                await this.moveObject('door',0,(this.doorMov),0,doorObjects[i]);
+                            }*/                              
 
                             this.updateActivatedObj(msg.obj,false);  
                         }                                    
@@ -163,12 +177,12 @@ let activeDoors = [];
                     else{
                         if(parseInt(this.getField('usersPlate')) === 1 && !this.hasPickedUp){
                             //Returning to original position
-                            this.moveObject('plate',0,0.1,0,msg.obj); 
+                            //await this.moveObject('plate',0,0.1,0,msg.obj); 
                             //Returning door
                             var doorObjects = this.getDoorObjects();
-                            for (var i = 0, l = doorObjects.length; i < l; i++) {
-                                this.moveObject('door',0,(this.doorMov),0,doorObjects[i]);
-                            }    
+                            /*for (var i = 0, l = doorObjects.length; i < l; i++) {
+                                await this.moveObject('door',0,(this.doorMov),0,doorObjects[i]);
+                            }*/    
 
                             this.hasPickedUp = true;
                         }    
@@ -313,9 +327,9 @@ let activeDoors = [];
                 this.setObjectPosition(x,y,z,newX,newY,newZ,obj);  
             }    
             else if(type === 'door'){
-                newX = x + setX;
-                newY = y + setY;
-                newZ = z + setZ;	
+                newX = setX;
+                newY = setY;
+                newZ = setZ;	
                 //Setting object position
                 this.setObjectPosition(x,y,z,newX,newY,newZ,obj.objectID);  
             }
@@ -366,11 +380,9 @@ let activeDoors = [];
     }
 
     playSound(){
-        const sound = this.paths.absolute('./treasure.mp3');
-     
         let volume = 0.2;
-        if (sound) {
-            this.plugin.audio.play(sound, { volume: volume })
+        if (this.doorSound) {
+            this.plugin.audio.play(this.doorSound, { x: this.fields.x || 0, y: this.fields.y || 0, height: this.fields.height || 0, radius: 10 }, { volume: volume })
         }
     }
  }
