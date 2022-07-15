@@ -140,6 +140,8 @@ let activeDoors = [];
                             this.hasPickedUp = false;   
 
                             let activatedObjects = this.getActivatedPlates();
+                            console.log(activatedObjects);
+                            console.log(this.getPlateObjects().length);
                             if(activatedObjects === this.getPlateObjects().length){
                                 for (var i = 0, l = doorObjects.length; i < l; i++) {
                                     if(parseFloat(this.getField('yDoor')) !== doorObjects[i].fields.height){
@@ -382,7 +384,7 @@ let activeDoors = [];
     playSound(){
         let volume = 0.2;
         if (this.doorSound) {
-            this.plugin.audio.play(this.doorSound, { x: this.fields.x || 0, y: this.fields.y || 0, height: this.fields.height || 0, radius: 10 }, { volume: volume })
+            this.plugin.audio.play(this.doorSound, { x: this.fields.x || 0, y: this.fields.y || 0, height: this.fields.height || 0, radius: 5 }, { volume: volume })
         }
     }
  }

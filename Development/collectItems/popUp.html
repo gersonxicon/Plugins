@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Admin Notes</title>
+</head>
+
+<body style="font-family: 'Roboto Mono', monospace;">
+
+
+  <!-- Notes-->    		  
+  <div id="container" class="container">
+	<img id="img1" class="image"/>
+	<img id="img2" class="image"/>
+	<img id="img3" class="image"/>
+  </div>
+
+
+  <!-- Code -->
+  <script lang="js">
+	// Called when a message is received from the plugin
+    window.addEventListener('message', function (e) {
+	  // Set admin message
+      if (e.data.action === 'set-collectables') {	
+		let imgSrc1 = e.data.imgs[0].silImg;
+		let imgSrc2 = e.data.imgs[1].silImg;
+		let imgSrc3 = e.data.imgs[2].silImg;
+		document.getElementById('img1').src = imgSrc1;		
+		document.getElementById('img2').src = imgSrc2;		
+		document.getElementById('img3').src = imgSrc3;		
+	  }
+	});
+	
+	 // Tell plugin to send us info
+    parent.postMessage({ action: 'overlay-load' }, '*')
+	
+  </script>
+  
+  <style>	
+	.content {
+	  width: 93%;
+	  height: 80%;
+	  display: flex;
+	  justify-content: center;
+	  align-items: center;
+	  overflow: hidden;
+	  object-fit: contain;
+	}
+
+	.image {
+		height: 40px;
+		width: 40px;
+	}
+
+	/* Position the sticky nicely, so it looks better */
+	html,
+	body {
+	  height: 100%;
+	  margin: 0;
+	  font-size: 11px;
+	  background-color: transparent;
+	  text-align: right;
+	}
+
+  </style>
+</body>
+</html>
