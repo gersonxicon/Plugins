@@ -32,11 +32,24 @@ let activeCollectable = [];
             settings: [
                 { type: 'text', id: 'activationDistance', name: 'Activation Distance', help: 'Set activation distance for object interaction (integer).' },
                 { type: 'text', id: 'objectName', name: 'Object Name', help: 'Set object name for this collectable item.' },
-                { type: 'text', id: 'objectKey', name: 'Object Key', help: 'Set object key for this collectable item.' },
+                { type: 'text', id: 'objectKey', name: 'Object Index', help: 'Set object index for this collectable item.' },
                 { type: 'text', id: 'img', name: 'Image', help: 'Set image for item in overlay panel.' },
-                { type: 'text', id: 'silImg', name: 'Placeholder image', help: 'Set silhouette image for item in overlay panel.' }
+                { type: 'text', id: 'silImg', name: 'Placeholder image', help: 'Set silhouette image for item in overlay panel.' },
+                { type: 'text', id: 'background', name: 'Overlay background', help: 'Set background image for overlay panel.' }
             ]
             });		
+
+        // Register close panel button
+		const hidePnl = await this.menus.register({
+            id: 'EYFoundry.reset-collectitems',
+            title: 'Reset collect',
+			text: 'Reset collect',
+            section: 'admin-panel',
+            adminOnly: true,
+			currentUser: true,
+            icon: this.paths.absolute('./reset.png'),
+            action: e => this.onResetCollect(e)
+        });
 
         // Stop here if on the server
         if (this.isServer) {
@@ -60,6 +73,17 @@ let activeCollectable = [];
           });
     }
 
+    /** Called when the user presses the Send Info button from Admin menu */
+    async onResetCollect(e) {
+        this.messages.send({ action: 'reset' }, true);        
+    }
+
+    async resetObjects(){
+        for (let activeObj of activeCollectable) {  
+            this.objects.update(activeObj.objectID, { hidden: false, disabled: false }, true);             
+        }
+    }
+
     /** Called when the plugin is unloaded */
     onUnload() {
         // Remove timer
@@ -74,20 +98,26 @@ let activeCollectable = [];
         if(msg.action === 'overlay-load'){
 			this.setAllCollectables(msg);
 		}
+        else if(msg.action === 'reset'){
+            this.setAllCollectables(null);   
+            this.resetObjects();
+        }        
     }
 
     /** When we receive a message, display it */
     setAllCollectables(msg) {
         var images = [];
+        var background = '';
         for (let activeObj of activeCollectable) {
             var valueToPush = {};
             valueToPush.img = activeObj.img;
             valueToPush.objKey = activeObj.objKey;
             valueToPush.silImg = activeObj.silImg;
+            background = activeObj.back;
             images.push(valueToPush);
         }
 		// Show message in iframe
-        this.menus.postMessage({ action: 'set-collectables', imgs: images });
+        this.menus.postMessage({ action: 'set-collectables', imgs: images, back: background });
     }
 
     /** Called on a regular interval */
@@ -116,6 +146,7 @@ let activeCollectable = [];
     objectKey = '';
     img = '';
     silImg = '';
+    back = '';
 
     /** Called when the component is loaded */
     async onLoad() {
@@ -127,7 +158,7 @@ let activeCollectable = [];
         this.objectKey = this.getField('objectKey');
         this.img = this.getField('img');
         this.silImg = this.getField('silImg');
-
+        this.back = this.getField('background')
         // Store it
         activeCollectable.push(this);
 
@@ -141,36 +172,42 @@ let activeCollectable = [];
         // Check if it's a claiming message
         if (msg.action === 'found') {
             // Show it            
-            if (!this.hasPickedUp) {
+            if (!this.hasPickedUp) {                
                 this.hasPickedUp = true;
-                this.plugin.objects.update(msg.obj, { hidden: true }, true);
-                this.showToastMessage(msg.usrName,msg.objName);
+                this.plugin.objects.update(msg.obj, { hidden: true, disabled: true }, true);
+                this.showToastMessage(msg.usrName,msg.objName,msg.objKey,msg.image);
                 // Remove coin from server
-                await this.performServerAction('remove-object');
+                //await this.performServerAction('remove-object',msg.obj);                
             }   
         }
     }
 
-    showToastMessage(usrName, objName){
+    async showToastMessage(usrName, objName, objKey, image){
         this.playSound();
-        const toastID = this.plugin.menus.toast({
+        const toastID = await this.plugin.menus.toast({
             icon: this.paths.absolute('./congrats.png'),
             text: usrName + ' has collected the ' + objName + '!',
             textColor: '#2DCA8C',      
-            duration: 6000
+            duration: 4000
         });
+        this.setImageOverlay(objKey,image);
     }
 
     /** Called when an action is performed */
-    onAction(action) {
+    onAction(action,obj) {
         // Remove this collectable
         if (action == 'remove-object') {
-            this.plugin.objects.remove(this.objectID)
+            this.plugin.objects.remove(obj);
         }
     }
 
     /** Called on a regular basis to check if user can see the object */
      onTimer(userPos) {
+        // Only allow pickup once
+        if (this.hasPickedUp) {
+            return
+        }
+
         const x = this.fields.x       || 0
         const y = this.fields.height  || 0
         const z = this.fields.y       || 0
@@ -186,7 +223,12 @@ let activeCollectable = [];
         }
        
         // Send message when object is found
-        this.sendMessage({ action: 'found', obj: this.objectID, objName: this.objectName, objKey: this.objectKey, usr: this.userId, usrName: this.userName },  true);
+        this.sendMessage({ action: 'found', obj: this.objectID, objName: this.objectName, objKey: this.objectKey, usr: this.userId, usrName: this.userName, image: this.img },  true);
+    }
+
+    setImageOverlay(objKey,image) {
+        // Show message in iframe
+        this.plugin.menus.postMessage({ action: 'set-image', img: image, ind: objKey });
     }
 
     playSound(){     
