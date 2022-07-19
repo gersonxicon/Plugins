@@ -7,6 +7,7 @@
  */
 /** List of active objects */
 let activeCollectable = [];
+let collectedItems = [];
  module.exports = class collectItemsPlugin extends BasePlugin {
 
     /** Plugin info */
@@ -79,9 +80,12 @@ let activeCollectable = [];
     }
 
     async resetObjects(){
-        for (let activeObj of activeCollectable) {  
+        collectedItems = [];
+        let activeCollectableAux = activeCollectable;
+        activeCollectable = [];
+        for (let activeObj of activeCollectableAux) {  
             this.objects.update(activeObj.objectID, { hidden: false, disabled: false }, true);             
-        }
+        }       
     }
 
     /** Called when the plugin is unloaded */
@@ -93,9 +97,10 @@ let activeCollectable = [];
     }	
 
     /** When an user receives the message */
-    onMessage(msg) {	
+    async onMessage(msg) {	
         // On iframe load
         if(msg.action === 'overlay-load'){
+            await new Promise(r => setTimeout(r, 5000));
 			this.setAllCollectables(msg);
 		}
         else if(msg.action === 'reset'){
@@ -105,7 +110,7 @@ let activeCollectable = [];
     }
 
     /** When we receive a message, display it */
-    setAllCollectables(msg) {
+    async setAllCollectables(msg) {
         var images = [];
         var background = '';
         for (let activeObj of activeCollectable) {
@@ -117,7 +122,7 @@ let activeCollectable = [];
             images.push(valueToPush);
         }
 		// Show message in iframe
-        this.menus.postMessage({ action: 'set-collectables', imgs: images, back: background });
+        await this.menus.postMessage({ action: 'set-collectables', imgs: images, back: background });
     }
 
     /** Called on a regular interval */
@@ -141,7 +146,8 @@ let activeCollectable = [];
     userId = '';
     userName = '';
     /** Door sound */
-    sound = this.paths.absolute('./treasure.mp3');
+    doorSound = this.paths.absolute('./treasure.mp3');
+    completedSound = this.paths.absolute('./completed.mp3');
     objectName = '';
     objectKey = '';
     img = '';
@@ -164,7 +170,11 @@ let activeCollectable = [];
 
         if (this.doorSound) {
             this.plugin.audio.preload(this.doorSound);
-        }        
+        }   
+        
+        if (this.completedSound) {
+            this.plugin.audio.preload(this.completedSound);
+        }   
     }
 
      /** Called when a message is received */
@@ -175,30 +185,21 @@ let activeCollectable = [];
             if (!this.hasPickedUp) {                
                 this.hasPickedUp = true;
                 this.plugin.objects.update(msg.obj, { hidden: true, disabled: true }, true);
-                this.showToastMessage(msg.usrName,msg.objName,msg.objKey,msg.image);
-                // Remove coin from server
-                //await this.performServerAction('remove-object',msg.obj);                
+                this.showToastMessage(msg.usrName,msg.objName,msg.objKey,msg.image);          
             }   
         }
     }
 
     async showToastMessage(usrName, objName, objKey, image){
+        collectedItems.push(objKey);
         this.playSound();
         const toastID = await this.plugin.menus.toast({
             icon: this.paths.absolute('./congrats.png'),
             text: usrName + ' has collected the ' + objName + '!',
             textColor: '#2DCA8C',      
-            duration: 4000
+            duration: 8000
         });
         this.setImageOverlay(objKey,image);
-    }
-
-    /** Called when an action is performed */
-    onAction(action,obj) {
-        // Remove this collectable
-        if (action == 'remove-object') {
-            this.plugin.objects.remove(obj);
-        }
     }
 
     /** Called on a regular basis to check if user can see the object */
@@ -229,12 +230,46 @@ let activeCollectable = [];
     setImageOverlay(objKey,image) {
         // Show message in iframe
         this.plugin.menus.postMessage({ action: 'set-image', img: image, ind: objKey });
+       
+        if(collectedItems.length === activeCollectable.length){
+            this.showCompleted();
+        }
+    }
+
+    async showCompleted()
+    {
+        if(!this.completed)
+        {
+            this.completed = true;
+            this.playCompletedSound();
+
+            // Register iframe in info panel
+            this.plugin.menus.register({
+                id: 'EYFoundry.overlay-completed',
+                section: 'overlay-top',
+                    panel: {
+                        iframeURL: this.paths.absolute('./completed.html'),
+                        width: 150,
+                        height: 100
+                    }
+                });            
+            await new Promise(r => setTimeout(r, 12000));        
+            this.plugin.menus.unregister('EYFoundry.overlay-completed');  
+            this.completed = false;
+        }
     }
 
     playSound(){     
         let volume = 0.2;
-        if (this.sound) {
-            this.plugin.audio.play(this.sound, { x: this.fields.x || 0, y: this.fields.y || 0, height: this.fields.height || 0, radius: 5 }, { volume: volume })
+        if (this.doorSound) {
+            this.plugin.audio.play(this.doorSound, { x: this.fields.x || 0, y: this.fields.y || 0, height: this.fields.height || 0, radius: 5 }, { volume: volume })
+        }
+    }
+
+    playCompletedSound(){
+        let volume = 0.4;
+        if (this.completedSound) {
+            this.plugin.audio.play(this.completedSound, { volume: volume })
         }
     }
  }

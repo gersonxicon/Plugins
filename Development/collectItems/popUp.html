@@ -14,6 +14,7 @@
   <!-- Notes-->    		  
   	</img>
   <div id="container" class="container">
+	<img id="back" class="image"/>
 	<img id="img0" class="image"/>
 	<img id="img1" class="image"/>
 	<img id="img2" class="image"/>
@@ -33,7 +34,7 @@
 		document.getElementById('img1').src = imgSrc1;		
 		document.getElementById('img2').src = imgSrc2;	
 		
-		document.getElementById('container').style.backgroundImage="url(" + e.data.back + ")";
+		document.getElementById('back').src = e.data.back;
 	  }
 	  else if(e.data.action === 'set-image') {
 		var imgName = 'img' + e.data.ind;
