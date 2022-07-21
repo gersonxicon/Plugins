@@ -11,7 +11,8 @@
 <body>
     <div>
         Congratulations, you've found all of the keys! 
-		Head to the center of the maze to unlock the portal!
+		<br/>
+		Head to the center of the maze to unlock the gateway to your next activity!
     </div>
 </body>
 
@@ -20,23 +21,29 @@
 	:root,
 	body {
 	  color: #FFD700;
-	  height: 300px;
+	  height: 200px;
 	  width: 100%;
 	  overflow: hidden;
-	  background: #013220;
+	  background: url('https://firebasestorage.googleapis.com/v0/b/ydangle-high-fidelity-test-2.appspot.com/o/server%2FupsT2cdLfe%2FMedia%2Foverlayscroll.png?alt=media&token=6bed899e-8c7e-4fd3-a57a-a439771d69e3') no-repeat center;
+	  -webkit-background-size: contain;
+	  -moz-background-size: contain;
+	  -o-background-size: contain;
+	  background-size: cover;
 	}
 
 	body {
 	  display: block;
+	  text-align: center;
 	}
 
 	div {
-	  background: 50% 100%/50% 50% no-repeat radial-gradient(ellipse at bottom, #FFD700, transparent, transparent);
+	  background: 50% 100%/50% 50% no-repeat radial-gradient(ellipse at bottom, #000, transparent, transparent);
 	  -webkit-background-clip: text;
 	  background-clip: text;	  
-	  padding: 15px;
+	  padding-left: 15px;
+	  padding-right: 15px;
 	  color: transparent;
-	  font-size: 2vw;
+	  font-size: 2.5vw;
 	  font-family: "Source Sans Pro", sans-serif;
 	  font-weight: bold;
 	  -webkit-animation: reveal 3000ms ease-in-out forwards 200ms, glow 2500ms linear infinite 2000ms;
@@ -60,12 +67,12 @@
 	}
 	@-webkit-keyframes glow {
 	  40% {
-		text-shadow: 0 0 8px #fff;
+		text-shadow: 0 0 8px #cc9c72;
 	  }
 	}
 	@keyframes glow {
 	  40% {
-		text-shadow: 0 0 8px #fff;
+		text-shadow: 0 0 8px #cc9c72;
 	  }
 }
 </style>

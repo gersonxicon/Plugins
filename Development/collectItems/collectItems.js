@@ -40,8 +40,8 @@ let collectedItems = [];
             ]
             });		
 
-        // Register close panel button
-		const hidePnl = await this.menus.register({
+        // Register reset collect button
+		const resetBtn = await this.menus.register({
             id: 'EYFoundry.reset-collectitems',
             title: 'Reset collect',
 			text: 'Reset collect',
@@ -76,7 +76,7 @@ let collectedItems = [];
 
     /** Called when the user presses the Send Info button from Admin menu */
     async onResetCollect(e) {
-        this.messages.send({ action: 'reset' }, true);        
+        this.messages.send({ action: 'reset' }, true);      
     }
 
     async resetObjects(){
@@ -86,6 +86,8 @@ let collectedItems = [];
         for (let activeObj of activeCollectableAux) {  
             this.objects.update(activeObj.objectID, { hidden: false, disabled: false }, true);             
         }       
+        
+        await this.hooks.trigger('opengate.resetgate');    
     }
 
     /** Called when the plugin is unloaded */
@@ -253,9 +255,10 @@ let collectedItems = [];
                         height: 100
                     }
                 });            
+            await this.plugin.hooks.trigger('opengate.keyscollected');
             await new Promise(r => setTimeout(r, 12000));        
             this.plugin.menus.unregister('EYFoundry.overlay-completed');  
-            this.completed = false;
+            this.completed = false;              
         }
     }
 
