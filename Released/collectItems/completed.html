@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset=utf-8>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#333641">
+    <title>Congratulations!</title>
+</head>
+
+<body>
+    <div>
+        Congratulations, you've found all of the keys! 
+		<br/>
+		Head to the center of the maze to unlock the gateway to your next activity!
+    </div>
+</body>
+
+<style>
+	@import url("https://fonts.googleapis.com/css?family=Source+Sans+Pro");
+	:root,
+	body {
+	  color: #FFD700;
+	  height: 200px;
+	  width: 100%;
+	  overflow: hidden;
+	  background: url('https://firebasestorage.googleapis.com/v0/b/ydangle-high-fidelity-test-2.appspot.com/o/server%2FupsT2cdLfe%2FMedia%2Foverlayscroll.png?alt=media&token=6bed899e-8c7e-4fd3-a57a-a439771d69e3') no-repeat center;
+	  -webkit-background-size: contain;
+	  -moz-background-size: contain;
+	  -o-background-size: contain;
+	  background-size: cover;
+	}
+
+	body {
+	  display: block;
+	  text-align: center;
+	}
+
+	div {
+	  background: 50% 100%/50% 50% no-repeat radial-gradient(ellipse at bottom, #000, transparent, transparent);
+	  -webkit-background-clip: text;
+	  background-clip: text;	  
+	  padding-left: 15px;
+	  padding-right: 15px;
+	  color: transparent;
+	  font-size: 2.5vw;
+	  font-family: "Source Sans Pro", sans-serif;
+	  font-weight: bold;
+	  -webkit-animation: reveal 3000ms ease-in-out forwards 200ms, glow 2500ms linear infinite 2000ms;
+			  animation: reveal 3000ms ease-in-out forwards 200ms, glow 2500ms linear infinite 2000ms;
+	}
+	@-webkit-keyframes reveal {
+	  80% {
+		letter-spacing: 8px;
+	  }
+	  100% {
+		background-size: 300% 300%;
+	  }
+	}
+	@keyframes reveal {
+	  80% {
+		letter-spacing: 8px;
+	  }
+	  100% {
+		background-size: 300% 300%;
+	  }
+	}
+	@-webkit-keyframes glow {
+	  40% {
+		text-shadow: 0 0 8px #cc9c72;
+	  }
+	}
+	@keyframes glow {
+	  40% {
+		text-shadow: 0 0 8px #cc9c72;
+	  }
+}
+</style>
+
+</html>
