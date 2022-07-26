@@ -23,8 +23,6 @@ let collectedItems = [];
     async onLoad() {
 		this.userId = await this.user.getID();
 			
-        this.registerOverlayPanel();
-
         // Register Object component
         this.objects.registerComponent(Obj, {
             id: 'EyFoundry.collectable-object',
@@ -57,6 +55,9 @@ let collectedItems = [];
             return;
         }
 
+        await new Promise(r => setTimeout(r, 5000));
+        this.registerOverlayPanel();
+
         // Start a distance check timer
         this.timer = setInterval(this.onTimer.bind(this), 200);
     }
@@ -76,7 +77,12 @@ let collectedItems = [];
 
     /** Called when the user presses the Send Info button from Admin menu */
     async onResetCollect(e) {
-        this.messages.send({ action: 'reset' }, true);      
+        if(collectedItems.length === activeCollectable.length){
+            this.messages.send({ action: 'reset' }, true);      
+        }
+        else{
+            this.menus.alert('You must collect all the keys first.', 'Information', 'info');
+        }
     }
 
     async resetObjects(){
@@ -86,7 +92,6 @@ let collectedItems = [];
         for (let activeObj of activeCollectableAux) {  
             this.objects.update(activeObj.objectID, { hidden: false, disabled: false }, true);             
         }       
-        
         await this.hooks.trigger('opengate.resetgate');    
     }
 
