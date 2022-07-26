@@ -61,6 +61,14 @@ let completed = false;
         this.onResetGate();
     }
     
+    /** Called when the plugin is unloaded */
+    onUnload() {
+        // Remove timer
+        if (this.timer) {
+            clearInterval(this.timer);
+        }
+    }	
+    
     /** Called on a regular interval */
     async onTimer() {
 

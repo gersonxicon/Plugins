@@ -124,7 +124,7 @@ let imagesList = '';
 
     async showIframe(){
         imagesList = this.getField('urlImages');
-        iframeID = await this.plugin.menus.displayPopup({ id: 'EYFoundry.iframe', title: 'Welcome!', panel: { iframeURL: this.paths.absolute('./popUp.html'), width: 500, height: 400 } });
+        iframeID = await this.plugin.menus.displayPopup({ id: 'EYFoundry.iframe', title: 'Welcome!', panel: { iframeURL: this.paths.absolute('./popUp.html'), width: 500, height: 500 } });
         this.playSound();
     }
 
