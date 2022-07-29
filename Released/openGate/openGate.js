@@ -31,6 +31,7 @@ let completed = false;
                 { type: 'text', id: 'yDoor', name: 'Y Location', help: 'Set Y location to transport.' },
                 { type: 'text', id: 'zDoor', name: 'Z Location', help: 'Set Z location to transport.' },
                 { type: 'text', id: 'activationDistance', name: 'Activation Distance', help: 'Set activation distance for object interaction (integer).' },
+                //Mark for tweening
                 { type: 'checkbox', id: 'padlock', name: 'Mark as padlock', help: 'Mark this object as a padlock.' }
             ]
         });		
