@@ -36,6 +36,7 @@ let posAfter = -20;
                     { type: 'text', id: 'img3', name: 'Image 3', help: 'Set image 3 for item in overlay panel.' },
                     { type: 'text', id: 'silImg', name: 'Placeholder image', help: 'Set silhouette image for item in overlay panel.' },
                     { type: 'text', id: 'background', name: 'Overlay background', help: 'Set background image for overlay panel.' },
+                    { type: 'text', id: 'congratulations', name: 'Overlay congratulations', help: 'Set background image for overlay congratulations panel.' },
                     { type: 'text', id: 'yObjectsBeforeLocation', name: 'Y Original Location', help: 'Set collectables Y original location.' },
                     { type: 'text', id: 'yObjectsAfterLocation', name: 'Y Location to move', help: 'Set collectables Y location to move after collected.' }
 
@@ -190,7 +191,23 @@ let posAfter = -20;
                     // Show message in iframe
                     await this.menus.postMessage({ action: 'set-image', img: image, ind: item });
                 }
+
+                //Validate if all items are collected then show message
+                var collectableArray = this.getCollectableArray().length;
+                if(collectableArray !== 3){
+                    collectableArray = 3;
+                }
+                
+                if(this.removeDuplicates(collectedItems).length >= collectableArray){                    
+                    try{
+                        activeCollectable[0].showCompleted();
+                    }catch{}
+                }
             }
+        }
+        else if(msg.action === 'congrats-load'){
+            // Set background image
+            await this.menus.postMessage({ action: 'set-congrats', img: this.getField('congratulations') });
         }
     }
 
